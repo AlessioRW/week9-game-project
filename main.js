@@ -3,7 +3,7 @@ import Phaser, { NONE } from 'phaser'
 const gameSize = {x:320,y:320}
 
 const numberOfLevels = 6
-let currentStage = 0
+let currentStage = 4
 function renderStage(ctx,currentStage,newPos,velocity){
   //console.log(currentStage)
   let stageObj = stages[currentStage]
@@ -101,6 +101,7 @@ function generateStages(ctx){ //add all stage data to stages arr to be rendered 
 let frameStart = new Date()
 let frameCounter = 0
 
+let fpsText;
 let heightText;
 let cursors;
 let newtext;
@@ -224,6 +225,7 @@ function create() {
   renderStage(this,currentStage,{x:180, y:200},{x:0, y:0})
   newtext = this.add.text(135,80,'', {fontSize: '20px', color: "#FF4231"})
   heightText = this.add.text(5,5,'Height: ', {fontSize: '10px', color: "#FF4231"})
+  fpsText = this.add.text(275,5,'Fps: ', {fontSize: '10px', color: "#FF4231"})
   //player.anims.play('idle',true)
 }
 
@@ -363,7 +365,7 @@ function update() {
   heightText.setText(`Height: ${(320-Math.floor(player.body.position.y))+(320*(currentStage+1))}`)
   if (frameCounter >= 60){
     frameCounter = 0 
-    //console.log(getFPS())
+    fpsText.setText(`Fps: ${getFPS()}`)
   }
 
   //this is probably really inefficient as it only needs to be done once in create
