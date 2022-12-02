@@ -3,7 +3,7 @@ import Phaser, { NONE } from 'phaser'
 const gameSize = {x:320,y:320}
 
 const numberOfLevels = 6
-let currentStage = 4
+let currentStage = 0
 function renderStage(ctx,currentStage,newPos,velocity){
   //console.log(currentStage)
   let stageObj = stages[currentStage]
@@ -27,9 +27,10 @@ function renderStage(ctx,currentStage,newPos,velocity){
   player.setScale(0.9)
   player.setBounce(0.9,0);
 
-  //set gnome overlap to win game, must be done after player
+  //make gnome visible and add collider
   if (currentStage === 4){
-    
+    gnome.visible = true
+    gnomeCollider = ctx.physics.add.overlap(player,gnome,win)
     //stageObj.gnomeCollider = gnomeCollider
   }
 
@@ -46,7 +47,8 @@ function deloadStage(ctx, currentStage){
 
   //deload gnome and it's overlap callback if stage === 4
   if (currentStage === 4){
-    
+    gnomeCollider.destroy()
+    gnome.visible = false
   }
 
   for (let background of stageObj.backgrounds){
@@ -91,11 +93,19 @@ function generateStages(ctx){ //add all stage data to stages arr to be rendered 
     stageObj.backgrounds = backgrounds
     stages.push(stageObj)
   }
+  gnome = ctx.physics.add.sprite(95,112,'gnome')
+  gnome.body.allowGravity = false
+  gnome.visible = false
 }
 
 let frameStart = new Date()
 let frameCounter = 0
 
+let heightText;
+let cursors;
+let newtext;
+let gnomeCollider;
+let gnome;
 let currentColliderObject;
 let player;
 let crouched = false; //player is crouching, will roll if moving
@@ -113,10 +123,6 @@ function getFPS(){
   let fps = 60/((frameEnd.getTime() - frameStart.getTime())/1000)
   frameStart = new Date()
   return(Math.floor(fps))
-}
-
-function win(){
-  
 }
 
 const game = new Phaser.Game({
@@ -215,7 +221,9 @@ function create() {
   music.play()
 
   generateStages(this)
-  renderStage(this,currentStage,{x:300, y:250},{x:0, y:0})
+  renderStage(this,currentStage,{x:180, y:200},{x:0, y:0})
+  newtext = this.add.text(135,80,'', {fontSize: '20px', color: "#FF4231"})
+  heightText = this.add.text(5,5,'Height: ', {fontSize: '10px', color: "#FF4231"})
   //player.anims.play('idle',true)
 }
 
@@ -293,6 +301,7 @@ function stop(ctx){
     // player.body.setOffset(43, 40);
     crouched = false
   }
+
 }
 
 function decideAnimation(){
@@ -341,10 +350,17 @@ function movementLogic(){
     running = false
   }
 }
+function win(){
+  gnome.body.acceleration.y = -50
+  gnome.body.angularVelocity = 50
+  newtext.setText('You freed him\nWell done')
+}
 
 //Game loop, all game logic for what is going on in game
 //runs every frame
-function update() {
+function update() { 
+  
+  heightText.setText(`Height: ${(320-Math.floor(player.body.position.y))+(320*(currentStage+1))}`)
   if (frameCounter >= 60){
     frameCounter = 0 
     //console.log(getFPS())
@@ -371,6 +387,12 @@ function update() {
 
     // player.setPosition(player.body.position.x+34, 50)
     renderStage(this,currentStage,{x:player.body.position.x+34, y:-50},{x:player.body.velocity.x, y:player.body.velocity.y})
+  }
+
+  if (player.body.position.x <= 0){
+    player.body.velocity.x = -200
+  } else if (player.body.position.x >= 320){
+    player.body.velocity.x = 200
   }
   frameCounter += 1
 }
