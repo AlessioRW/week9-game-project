@@ -1,0 +1,56 @@
+
+
+move animation logic into seperate function, animations will onyl be decided in there
+
+MVP:
+    html page styling, logo & background
+    intro screen
+    ---movement system 
+    ---animations correctly accompanying movements
+    ---platform rendering funtion using 2d array of objects containing platform information for each stage
+    ---movement between stage/screen vertically
+    >= 5 floor platformer stage
+
+extra:
+    enemies/threats -> player death
+    possible enemies/threats:
+        arrows from walls
+        small moving thing (like goomba)
+    death screen
+
+stage system note 
+no platform cat touch either the bottom or top of the screen without having a platform on the
+following or previous screen connecting to it otherwise there will be collision box errors where the platform loads
+onto the player
+
+
+Stage system -- Done
+
+all the platform objects will be generated in the creation funciton and pushed into a 2d array from the seed data.
+when the player moves up or down a stage, the platform objects and the platforms colliders with the player
+of the stage before will have visibility and active set to false. (the colliders will be stored alongside the platform objects)
+
+the render function will take a stage and make the stages platforms and colliders visible and active
+
+--- Done
+
+animation hierarchy --
+
+if inAir:
+    falling down -- if in air && vel y is down
+    jumping up -- if in air && vel y is up
+
+else:
+    if preJump:
+        preJump
+    else:
+        if running:
+            if crouching:
+                crouch walk 
+            else:
+                run
+        else:
+            if crouched:
+                crouch idle
+            else:
+                idle
