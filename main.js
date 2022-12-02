@@ -14,11 +14,6 @@ function renderStage(ctx,currentStage,newPos,velocity){
   //add decorations
   stageObj.decorations.visible = true
 
-  //add gnome is stage === 5
-  if (currentStage === 4){
-    stageObj.gnomeLayer.visible = true
-  }
-
   //add colliders and make them visible
   if (player){
     player.destroy()
@@ -32,6 +27,12 @@ function renderStage(ctx,currentStage,newPos,velocity){
   player.setScale(0.9)
   player.setBounce(0.9,0);
 
+  //set gnome overlap to win game, must be done after player
+  if (currentStage === 4){
+    
+    //stageObj.gnomeCollider = gnomeCollider
+  }
+
   currentColliderObject = ctx.physics.add.collider(player,stageObj.colliders) //when rendering new stage, use currentColliderObject.destroy() to remove current colliders
   stageObj.colliders.visible = true
 
@@ -43,9 +44,9 @@ function deloadStage(ctx, currentStage){
   stageObj.colliders.visible = false
   stageObj.decorations.visible = false
 
-  //deload gnome is stage === 5
+  //deload gnome and it's overlap callback if stage === 4
   if (currentStage === 4){
-    stageObj.gnomeLayer.visible = false
+    
   }
 
   for (let background of stageObj.backgrounds){
@@ -81,16 +82,6 @@ function generateStages(ctx){ //add all stage data to stages arr to be rendered 
     //add decoration layer
     let decorationLayer = stage.createLayer('decs', tileset, 0, 0)
 
-    //add gnome if layer === 5
-    if (i === 4){
-      console.log(stage)
-      let gnomeImage = stage.addTilesetImage('gnome', 'gnome')
-      let gnomeLayer = stage.createLayer('gnome', gnomeImage, 0, 0)
-      gnomeLayer.visible = false
-      stageObj.gnomeLayer = gnomeLayer
-      
-    }
-
     //make stage invisble before so they can be rendered indiviually
     decorationLayer.visible = false
     stageColliderPlatforms.visible = false
@@ -104,7 +95,6 @@ function generateStages(ctx){ //add all stage data to stages arr to be rendered 
 
 let frameStart = new Date()
 let frameCounter = 0
-
 
 let currentColliderObject;
 let player;
@@ -125,16 +115,9 @@ function getFPS(){
   return(Math.floor(fps))
 }
 
-let lastVelocities = [0,0] //current last 2 velocities, if all are 0, you are on the ground
-function isInAir(){
-  for (let vel of lastVelocities){
-    if (vel !== 0){
-      return false
-    }
-  }
-  return true
+function win(){
+  
 }
-
 
 const game = new Phaser.Game({
   type: Phaser.AUTO,
@@ -232,7 +215,7 @@ function create() {
   music.play()
 
   generateStages(this)
-  renderStage(this,currentStage,{x:60, y:20},{x:0, y:0})
+  renderStage(this,currentStage,{x:300, y:250},{x:0, y:0})
   //player.anims.play('idle',true)
 }
 
@@ -341,9 +324,7 @@ function decideAnimation(){
 }
 
 function movementLogic(){
-  lastVelocities.splice(0,1)
-  lastVelocities.push(player.body.velocity.y)
-  if (isInAir()){ //if the player is touching the ground
+  if (player.body.onFloor()){ //if the player is touching the ground
     if (inAir){
       player.setVelocity(0,0)
       running = false
